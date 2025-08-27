@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { 
   Mail, Phone, MapPin, Clock, Send, 
-  Building2, MessageCircle, AlertCircle 
+  MessageCircle, AlertCircle 
 } from 'lucide-react'
 
 const Contact = () => {
@@ -44,16 +44,16 @@ const Contact = () => {
     {
       icon: Phone,
       title: "Phone",
-      value: "+231 XXX XXX XXX",
+      value: "+231 763-346-3875",
       description: "Mon-Fri from 8am to 6pm",
-      action: "tel:+231XXXXXXXXX"
+      action: "tel:+2317633463875"
     },
     {
       icon: MapPin,
       title: "Office",
       value: "Monrovia, Liberia",
       description: "Visit us in person",
-      action: "#"
+      action: "lineartravel.com/liberia/monrovia"
     },
     {
       icon: Clock,
@@ -274,12 +274,18 @@ const Contact = () => {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold text-primary mb-4">Our Office</h3>
                   <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center">
-                    <div className="text-center text-gray-500">
-                      <MapPin className="w-12 h-12 mx-auto mb-2" />
-                      <p>Map integration coming soon</p>
-                      <p className="text-sm">Monrovia, Liberia</p>
-                    </div>
+                    <iframe
+                      title="Monrovia Office Location"
+                      src="https://www.google.com/maps?q=Monrovia,+Liberia&output=embed"
+                      width="100%"
+                      height="180"
+                      style={{ border: 0, borderRadius: '0.5rem' }}
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
                   </div>
+                  <p className="text-center text-gray-500 mt-2 text-sm">Monrovia, Liberia</p>
                 </div>
               </div>
             </div>

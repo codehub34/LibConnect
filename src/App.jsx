@@ -10,6 +10,8 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import AdminDashboard from './pages/AdminDashboard'
 import Pricing from './pages/Pricing'
+import Privacy from './pages/Privacy'
+// import Terms from './pages/Terms'
 import UserDashboard from './pages/UserDashboard'
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/privacy" element={<Privacy />} />
+            {/* <Route path="/terms" element={<Terms />} /> */}
           </Routes>
         </main>
         

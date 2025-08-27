@@ -37,22 +37,22 @@ const About = () => {
 
   const team = [
     {
-      name: "Sarah Johnson",
-      role: "Founder & CEO",
-      bio: "Former tech executive with 15+ years experience in digital transformation and business development.",
-      image: null
+      name: "Mass Mass",
+      role: "Founder & Developer Lead",
+      bio: "Tech enthusiast and entrepreneur dedicated to empowering local businesses through technology.",
+      image: "./src/assets/Mass.jpg"
     },
     {
-      name: "Michael Chen",
-      role: "Head of Technology",
-      bio: "Software engineer and entrepreneur passionate about building scalable solutions for emerging markets.",
-      image: null
+      name: "Kcaliphate Malcolm",
+      role: "Product Manager",
+      bio: "Passionate about building user-centric products that solve real-world problems.",
+      image: "./src/assets/Kcaliphate.jpg"
     },
     {
-      name: "Aisha Kamara",
-      role: "Community Manager",
-      bio: "Local business advocate with extensive network across Liberia's business community.",
-      image: null
+      name: "Musa K Coneh",
+      role: "Business Development Manager",
+      bio: "Connecting businesses with opportunities to thrive in the digital age.",
+      image: "./src/assets/Musa.jpg"
     }
   ]
 
@@ -238,9 +238,18 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {team.map((member, index) => (
                 <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center">
+                  {member.image ? (
+                    <img 
+                      src={member.image} 
+                      alt={member.name} 
+                      className="w-24 h-24 rounded-full object-cover mx-auto mb-4"
+                    />
+                  ) : ( 
+
                   <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="w-12 h-12 text-primary" />
                   </div>
+                  )}
                   <h3 className="text-xl font-semibold text-primary mb-2">{member.name}</h3>
                   <p className="text-secondary font-medium mb-3">{member.role}</p>
                   <p className="text-gray-600">{member.bio}</p>
