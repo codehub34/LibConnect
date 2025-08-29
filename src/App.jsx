@@ -1,18 +1,18 @@
-import { Routes, Route } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import Home from './pages/Home'
-import Directory from './pages/Directory'
-import BusinessProfile from './pages/BusinessProfile'
-import AddListing from './pages/AddListing'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import AdminDashboard from './pages/AdminDashboard'
-import Pricing from './pages/Pricing'
-import Privacy from './pages/Privacy'
+import { Routes, Route } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Directory from './pages/Directory';
+import BusinessProfile from './pages/BusinessProfile';
+import AddListing from './pages/AddListing';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import AdminDashboard from './pages/AdminDashboard';
+import Pricing from './pages/Pricing';
+import Privacy from './pages/Privacy';
 // import Terms from './pages/Terms'
-import UserDashboard from './pages/UserDashboard'
+import UserDashboard from './pages/UserDashboard';
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
         <Footer />
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

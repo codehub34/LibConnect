@@ -29,7 +29,7 @@ const Pricing = () => {
     {
       id: 'standard',
       name: 'Standard',
-      price: '$6.25',
+      price: '$1.25',
       duration: 'per month',
       description: 'Enhanced features for growing businesses',
       features: [
@@ -49,7 +49,7 @@ const Pricing = () => {
     {
       id: 'premium',
       name: 'Premium',
-      price: '$12.50',
+      price: '$2.50',
       duration: 'per month',
       description: 'Maximum visibility and premium features',
       features: [

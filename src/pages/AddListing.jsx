@@ -1,16 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
+import { createClient } from '@supabase/supabase-js'
 import { 
   Building2, MapPin, Phone, Mail, Globe, Clock, 
-  Upload, CheckCircle, AlertCircle 
+  Upload, CheckCircle, AlertCircle, Map
 } from 'lucide-react'
+
+// Initialize Supabase client - using fallback for development
+const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || window.ENV?.REACT_APP_SUPABASE_URL || 'YOUR_SUPABASE_URL'
+const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || window.ENV?.REACT_APP_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY'
+
+// Only initialize Supabase if we have valid credentials
+let supabase = null
+if (supabaseUrl !== 'YOUR_SUPABASE_URL' && supabaseKey !== 'YOUR_SUPABASE_ANON_KEY') {
+  supabase = createClient(supabaseUrl, supabaseKey)
+}
+
+// Google Maps API key - using fallback for development
+const GOOGLE_MAPS_API_KEY = import.meta.env?.VITE_GOOGLE_MAPS_API_KEY || window.ENV?.REACT_APP_GOOGLE_MAPS_API_KEY || null
 
 const AddListing = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({})
+  const [mapCenter, setMapCenter] = useState({ lat: 6.3106, lng: -10.8047 }) // Monrovia coordinates
+  const [selectedLocation, setSelectedLocation] = useState(null)
+  const [map, setMap] = useState(null)
+  const [geocoder, setGeocoder] = useState(null)
   
   const {
     register,
@@ -43,27 +61,199 @@ const AddListing = () => {
     { key: 'sunday', label: 'Sunday' }
   ]
 
+  // Initialize Google Maps
+  useEffect(() => {
+    if (!window.google && GOOGLE_MAPS_API_KEY) {
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry`
+      script.async = true
+      script.defer = true
+      script.onload = initMap
+      document.head.appendChild(script)
+    } else if (window.google) {
+      initMap()
+    }
+  }, [currentStep])
+
+  const initMap = () => {
+    if (currentStep === 2 && window.google) {
+      const mapElement = document.getElementById('map')
+      if (mapElement) {
+        const newMap = new window.google.maps.Map(mapElement, {
+          center: mapCenter,
+          zoom: 12,
+          mapTypeControl: false,
+          streetViewControl: false,
+        })
+
+        const newGeocoder = new window.google.maps.Geocoder()
+        setGeocoder(newGeocoder)
+
+        // Add click listener to map
+        newMap.addListener('click', (event) => {
+          const lat = event.latLng.lat()
+          const lng = event.latLng.lng()
+          
+          // Clear previous markers
+          if (window.currentMarker) {
+            window.currentMarker.setMap(null)
+          }
+
+          // Add new marker
+          const marker = new window.google.maps.Marker({
+            position: { lat, lng },
+            map: newMap,
+            title: 'Selected Location'
+          })
+
+          window.currentMarker = marker
+          setSelectedLocation({ lat, lng })
+
+          // Reverse geocode to get address
+          newGeocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+              setValue('address', results[0].formatted_address)
+            }
+          })
+        })
+
+        setMap(newMap)
+      }
+    }
+  }
+
+  // Upload file to Supabase Storage
+  const uploadFile = async (file) => {
+    if (!supabase) {
+      console.warn('Supabase not initialized. File upload skipped.')
+      return null
+    }
+
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `logos/${fileName}`
+
+    const { data, error } = await supabase.storage
+      .from('business-assets')
+      .upload(filePath, file)
+
+    if (error) {
+      throw error
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('business-assets')
+      .getPublicUrl(filePath)
+
+    return publicUrl
+  }
+
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
       // Store form data for next step
-      setFormData({ ...formData, ...data })
+      const updatedFormData = { ...formData, ...data }
+      
+      if (selectedLocation) {
+        updatedFormData.coordinates = selectedLocation
+      }
+
+      setFormData(updatedFormData)
       
       if (currentStep < 3) {
         setCurrentStep(currentStep + 1)
         toast.success('Information saved! Please continue to the next step.')
       } else {
-        // Final submission
+        // Final submission to Supabase
+        let logoUrl = null
+        
+        // Upload logo if provided and Supabase is available
+        if (data.logo && data.logo instanceof File) {
+          try {
+            logoUrl = await uploadFile(data.logo)
+          } catch (error) {
+            console.error('Logo upload failed:', error)
+            toast.error('Failed to upload logo, but listing will be saved without it.')
+          }
+        }
+
+        // Prepare business hours data
+        const businessHours = {}
+        workingDays.forEach(day => {
+          const openTime = updatedFormData.hours?.[day.key]?.open
+          const closeTime = updatedFormData.hours?.[day.key]?.close
+          if (openTime && closeTime) {
+            businessHours[day.key] = {
+              open: openTime,
+              close: closeTime,
+              isOpen: true
+            }
+          } else {
+            businessHours[day.key] = {
+              isOpen: false
+            }
+          }
+        })
+
+        // Insert into Supabase if available, otherwise simulate success
+        if (supabase) {
+          const { data: insertData, error } = await supabase
+            .from('business_listings')
+            .insert([
+              {
+                business_name: updatedFormData.businessName,
+                category: updatedFormData.category,
+                description: updatedFormData.description,
+                phone: updatedFormData.phone,
+                email: updatedFormData.email,
+                website: updatedFormData.website || null,
+                location: updatedFormData.location,
+                address: updatedFormData.address,
+                coordinates: selectedLocation,
+                business_hours: businessHours,
+                services: updatedFormData.services || null,
+                notes: updatedFormData.notes || null,
+                logo_url: logoUrl,
+                status: 'pending', // Will be reviewed
+                created_at: new Date().toISOString()
+              }
+            ])
+
+          if (error) {
+            throw error
+          }
+        } else {
+          // Simulate successful submission for development
+          console.log('Demo mode - would save:', {
+            business_name: updatedFormData.businessName,
+            category: updatedFormData.category,
+            description: updatedFormData.description,
+            phone: updatedFormData.phone,
+            email: updatedFormData.email,
+            website: updatedFormData.website || null,
+            location: updatedFormData.location,
+            address: updatedFormData.address,
+            coordinates: selectedLocation,
+            business_hours: businessHours,
+            services: updatedFormData.services || null,
+            notes: updatedFormData.notes || null,
+            logo_url: logoUrl
+          })
+        }
+
         toast.success('Your business listing has been submitted successfully! We will review it within 24-48 hours and notify you via email.')
         reset()
         setCurrentStep(1)
         setFormData({})
+        setSelectedLocation(null)
+        if (window.currentMarker) {
+          window.currentMarker.setMap(null)
+        }
       }
     } catch (error) {
+      console.error('Submission error:', error)
       toast.error('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -79,6 +269,37 @@ const AddListing = () => {
       }
       setValue('logo', file)
       toast.success('Logo uploaded successfully!')
+    }
+  }
+
+  const handleLocationSelect = (location) => {
+    if (geocoder && map) {
+      geocoder.geocode({ address: location + ', Liberia' }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const location = results[0].geometry.location
+          map.setCenter(location)
+          map.setZoom(13)
+          
+          // Clear previous markers
+          if (window.currentMarker) {
+            window.currentMarker.setMap(null)
+          }
+
+          // Add marker for the selected city
+          const marker = new window.google.maps.Marker({
+            position: location,
+            map: map,
+            title: results[0].formatted_address
+          })
+
+          window.currentMarker = marker
+          setSelectedLocation({ 
+            lat: location.lat(), 
+            lng: location.lng() 
+          })
+          setValue('address', results[0].formatted_address)
+        }
+      })
     }
   }
 
@@ -271,6 +492,9 @@ const AddListing = () => {
           <select
             {...register('location', { required: 'Location is required' })}
             className="input-field"
+            onChange={(e) => {
+              handleLocationSelect(e.target.value)
+            }}
           >
             <option value="">Select a location</option>
             {locations.map((location) => (
@@ -304,6 +528,32 @@ const AddListing = () => {
             </p>
           )}
         </div>
+
+        {/* Google Maps Integration */}
+        {GOOGLE_MAPS_API_KEY && (
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Map className="w-4 h-4 inline mr-1" />
+              Select Your Exact Location (Optional)
+            </label>
+            <div className="border rounded-lg overflow-hidden">
+              <div 
+                id="map" 
+                style={{ height: '300px', width: '100%' }}
+                className="bg-gray-100"
+              ></div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Click on the map to pinpoint your exact business location. This helps customers find you more easily.
+            </p>
+            {selectedLocation && (
+              <p className="text-sm text-green-600 mt-2 flex items-center">
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Location selected: {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -327,7 +577,7 @@ const AddListing = () => {
                   {...register(`hours.${day.key}.open`)}
                   className="input-field flex-1"
                 >
-                  <option value="">Open</option>
+                  <option value="">Closed</option>
                   {Array.from({ length: 24 }, (_, i) => {
                     const hour = i === 0 ? 12 : i > 12 ? i - 12 : i
                     const ampm = i >= 12 ? 'PM' : 'AM'
@@ -343,7 +593,7 @@ const AddListing = () => {
                   {...register(`hours.${day.key}.close`)}
                   className="input-field flex-1"
                 >
-                  <option value="">Close</option>
+                  <option value="">Closed</option>
                   {Array.from({ length: 24 }, (_, i) => {
                     const hour = i === 0 ? 12 : i > 12 ? i - 12 : i
                     const ampm = i >= 12 ? 'PM' : 'AM'

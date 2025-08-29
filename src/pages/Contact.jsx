@@ -6,6 +6,8 @@ import {
   Mail, Phone, MapPin, Clock, Send, 
   MessageCircle, AlertCircle 
 } from 'lucide-react'
+// Supabase connection
+import { supabase } from '../supabaseClient.js'
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -21,8 +23,22 @@ const Contact = () => {
     setIsSubmitting(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Supabase API call to insert data into the 'contacts' table
+      const { error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            email: data.email,
+            subject: data.subject,
+            message: data.message,
+          },
+        ])
+
+      if (error) {
+        throw error
+      }
       
       toast.success('Thank you for your message! We will get back to you within 24 hours.')
       reset()
