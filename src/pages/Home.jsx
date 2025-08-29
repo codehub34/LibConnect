@@ -4,7 +4,7 @@ import { ArrowRight, Building2, Users, Globe, Award, Star, Clock, Crown } from '
 import SearchBar from '../components/SearchBar';
 import BusinessCard from '../components/BusinessCard';
 // Import the data from the businesses.js file
-import { mockBusinesses, categories } from '../data/businesses'; 
+import { mockBusinesses, categories } from '/src/data/businesses.js'; 
 
 const Home = () => {
     // This is where you should pull the featured businesses from your mock data

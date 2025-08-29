@@ -350,10 +350,80 @@ export const mockBusinesses = [
   }
 ];
 
+// Function to count businesses by category
+const getBusinessCountByCategory = (categoryName) => {
+  return mockBusinesses.filter(business => business.category === categoryName).length;
+};
+
+// Updated categories with proper structure for the Home component
 export const categories = [
+  {
+    name: "Technology",
+    icon: "💻",
+    count: getBusinessCountByCategory("Technology")
+  },
+  {
+    name: "Agriculture",
+    icon: "🌾",
+    count: getBusinessCountByCategory("Agriculture")
+  },
+  {
+    name: "Healthcare",
+    icon: "🏥",
+    count: getBusinessCountByCategory("Healthcare")
+  },
+  {
+    name: "Education",
+    icon: "📚",
+    count: getBusinessCountByCategory("Education")
+  },
+  {
+    name: "Finance",
+    icon: "💰",
+    count: getBusinessCountByCategory("Finance")
+  },
+  {
+    name: "Construction",
+    icon: "🏗️",
+    count: getBusinessCountByCategory("Construction")
+  },
+  {
+    name: "Tourism",
+    icon: "🎭",
+    count: getBusinessCountByCategory("Tourism")
+  },
+  {
+    name: "Retail",
+    icon: "🛍️",
+    count: getBusinessCountByCategory("Retail")
+  },
+  {
+    name: "Logistics",
+    icon: "🚚",
+    count: getBusinessCountByCategory("Logistics")
+  },
+  {
+    name: "Transportation",
+    icon: "🚗",
+    count: getBusinessCountByCategory("Transportation")
+  },
+  {
+    name: "Food & Beverage",
+    icon: "🍽️",
+    count: getBusinessCountByCategory("Food & Beverage")
+  },
+  {
+    name: "Media",
+    icon: "📺",
+    count: getBusinessCountByCategory("Media")
+  }
+];
+
+// Keep the simple array for backwards compatibility if needed elsewhere
+export const categoryNames = [
   "Technology", "Agriculture", "Healthcare", "Education",
   "Finance", "Manufacturing", "Tourism", "Transportation",
-  "Retail", "Food & Beverage", "Construction", "Media"
+  "Retail", "Food & Beverage", "Construction", "Media", "Logistics"
 ];
 
 export const locations = [
