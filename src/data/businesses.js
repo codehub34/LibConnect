@@ -2,8 +2,9 @@
 // Import all your logo images here.
 // Note: You must have these files in your businessLogo folder.
 import aiistLogo from '../businessLogo/aiist_logo.png';
-import greenEarthLogo from '../businessLogo/green_earth_agriculture.png';
+// import greenEarthLogo from '../businessLogo/green_earth_agriculture.png';
 // Import other logos as needed
+// import './business.css'
 
 export const mockBusinesses = [
   {
@@ -14,9 +15,9 @@ export const mockBusinesses = [
     location: "Benson & Newport, Intersection Afropolitant Building, Monrovia, Liberia",
     rating: 4.8,
     reviewCount: 24,
-    phone: "+231 123 456 789",
-    email: "info@aiist.edu.lr",
-    website: "http://www.aiist.edu.lr",
+    phone: "(+231) 881-673-643",
+    email: "info@aiist.net",
+    website: "https://www.aiist.net/index.php",
     logo: aiistLogo,
     services: [
       "Computer Science",
@@ -46,7 +47,7 @@ export const mockBusinesses = [
     phone: "+231 987 654 321",
     email: "contact@greenearth.com",
     website: "http://www.greenearthagri.com",
-    logo: greenEarthLogo,
+    logo: null,
     services: [
       "Organic Farming",
       "Produce Supply",

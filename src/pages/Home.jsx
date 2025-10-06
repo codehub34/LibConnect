@@ -192,7 +192,7 @@ const Home = () => {
                 </div>
             </section>
             {/* Pricing CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-secondary to-secondary-light">
+            {/* <section className="py-20 bg-gradient-to-r from-secondary to-secondary-light">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold text-primary font-lato mb-4">
@@ -258,7 +258,7 @@ const Home = () => {
                         </Link>
                     </div>
                 </div>
-            </section>
+            </section> */}
             {/* CTA Section */}
             <section className="py-20 bg-primary text-white">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
